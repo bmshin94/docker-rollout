@@ -1,8 +1,4 @@
-# Override with a healthcheck that never passes, used to exercise the
-# rollback path: new containers never become healthy, so docker-rollout
-# must remove them and leave the old container running. Used with the
-# base file and a short --timeout:
-#   docker rollout -f compose.yml -f compose.unhealthy.yml -t 5 web
+# Override with a healthcheck that never passes
 services:
   web:
     healthcheck:

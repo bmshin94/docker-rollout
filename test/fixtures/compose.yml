@@ -1,6 +1,4 @@
 # Base fixture: a tiny busybox HTTP server with no healthcheck.
-# Deliberately has no `container_name` and no `ports`, so multiple
-# instances can coexist during a rollout (see README caveats).
 services:
   web:
     image: busybox

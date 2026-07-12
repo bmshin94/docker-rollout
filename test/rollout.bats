@@ -15,7 +15,7 @@ setup() {
 
   # Isolate each test in its own Compose project. The script inherits this
   # env var, so its `docker compose` calls target the same project.
-  export COMPOSE_PROJECT_NAME="drtest-${BATS_TEST_NUMBER}-$$"
+  export COMPOSE_PROJECT_NAME="docker-rollout-test-${BATS_TEST_NUMBER}-$$"
 }
 
 teardown() {
@@ -94,11 +94,7 @@ assert_none_running() {
 }
 
 @test "replaces an exited old container instead of restarting it" {
-  # KNOWN BUG: `docker compose ps -q` lists only running containers, so when
-  # the only existing container is Exited the script takes the "service is not
-  # running" branch and runs `up --no-recreate`, which restarts the same old
-  # (broken) container rather than creating a fresh one from current config.
-  # Remove this `skip` once the bug is fixed.
+  # https://github.com/wowu/docker-rollout/issues/20
   skip "known bug: exited old container is restarted, not replaced"
 
   docker compose -f "$BASE" up --detach --scale web=1 web
