@@ -1,0 +1,12 @@
+# Override that adds a fast file-toggle healthcheck to `web`.
+# The container is healthy unless /tmp/drain exists, mirroring the
+# container-draining pattern from the docs. Used with the base file:
+#   docker rollout -f compose.yml -f compose.healthcheck.yml web
+services:
+  web:
+    healthcheck:
+      test: test ! -f /tmp/drain
+      interval: 1s
+      timeout: 2s
+      retries: 2
+      start_period: 1s
