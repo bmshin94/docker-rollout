@@ -93,6 +93,30 @@ assert_none_running() {
   echo "$(container_ids)" | grep -q "$old_id" || fail "old container was removed during rollback"
 }
 
+@test "replaces an exited old container instead of restarting it" {
+  # KNOWN BUG: `docker compose ps -q` lists only running containers, so when
+  # the only existing container is Exited the script takes the "service is not
+  # running" branch and runs `up --no-recreate`, which restarts the same old
+  # (broken) container rather than creating a fresh one from current config.
+  # Remove this `skip` once the bug is fixed.
+  skip "known bug: exited old container is restarted, not replaced"
+
+  docker compose -f "$BASE" up --detach --scale web=1 web
+  local old_id
+  old_id="$(container_ids)"
+  # Force the container into an Exited state (any exit triggers the bug).
+  docker stop "$old_id"
+
+  run "$ROLLOUT" rollout -f "$BASE" -w 1 web
+  [ "$status" -eq 0 ] || fail "rollout failed ($status): $output"
+
+  # We expect a fresh container running the current config, not the old one.
+  [ "$(running_count)" -eq 1 ] || fail "expected 1 running container, got $(running_count)"
+  local new_id
+  new_id="$(container_ids)"
+  [ "$new_id" != "$old_id" ] || fail "old exited container was restarted instead of replaced"
+}
+
 @test "rolls a 2-instance service (2 -> 4 -> 2) swapping both containers" {
   docker compose -f "$BASE" -f "$HEALTHY" up --detach --scale web=2 web
   local old_ids

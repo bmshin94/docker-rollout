@@ -15,4 +15,5 @@ function task:help { ## List available tasks
 }
 
 
+# shellcheck disable=SC2145
 task:"${@:-help}"
